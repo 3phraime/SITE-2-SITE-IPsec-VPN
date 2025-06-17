@@ -1,14 +1,4 @@
-=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2025.06.17 08:41:27 =~=~=~=~=~=~=~=~=~=~=~=
-SHOW
-      ^
-unknown command.
-root# SHOW               run shpow         ow conmf
-               ^
-syntax error, expecting <command>.
-root# run show conmf               g
-               ^
-syntax error, expecting <command>.
-root# run show cong       figuration security 
+
 ike {
     proposal lag-abj-proposal {
         authentication-method pre-shared-keys;
@@ -32,7 +22,9 @@ ipsec {
     proposal lag-abj-ipsec-proposal {
         protocol esp;
         authentication-algorithm hmac-sha1-96;
----(more)---                                                encryption-algorithm aes-256-cbc;
+---(more)---
+                                        
+        encryption-algorithm aes-256-cbc;
         lifetime-seconds 86400;
         lifetime-kilobytes 4608000;
     }
@@ -55,7 +47,9 @@ ipsec {
 policies {
     from-zone trust to-zone untrust {
         policy trust-untrust-policy {
----(more 34%)---                                                    match {
+---(more 34%)---
+                                        
+            match {
                 source-address trust-subnet;
                 destination-address untrust-subnet;
                 application junos-ping;
@@ -78,7 +72,9 @@ policies {
         }
     }
     from-zone vpn to-zone trust {
----(more 51%)---                                                policy vpn-trust-policy {
+---(more 51%)---
+                                        
+        policy vpn-trust-policy {
             match {
                 source-address vpn-subnet;
                 destination-address trust-subnet;
@@ -101,7 +97,9 @@ policies {
             }
         }
     }
----(more 68%)---                                        }
+---(more 68%)---
+                                        
+}
 zones {
     security-zone trust {
         address-book {
@@ -124,7 +122,9 @@ zones {
             system-services {
                 ping;
                 ike;
----(more 85%)---                                                    }
+---(more 85%)---
+                                        
+            }
         }
         interfaces {
             ge-0/0/0.0;
@@ -145,8 +145,6 @@ zones {
     }
 }
 
-[edit]
-root# root# run show configuration security    | display set | no-more 
 set security ike proposal lag-abj-proposal authentication-method pre-shared-keys
 set security ike proposal lag-abj-proposal dh-group group2
 set security ike proposal lag-abj-proposal authentication-algorithm sha-256
@@ -197,5 +195,3 @@ set security zones security-zone vpn address-book address vpn-subnet 172.16.1.0/
 set security zones security-zone vpn host-inbound-traffic system-services ike
 set security zones security-zone vpn interfaces st0.0
 
-[edit]
-root# 
