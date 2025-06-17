@@ -1,0 +1,201 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2025.06.17 08:41:27 =~=~=~=~=~=~=~=~=~=~=~=
+SHOW
+      ^
+unknown command.
+root# SHOW               run shpow         ow conmf
+               ^
+syntax error, expecting <command>.
+root# run show conmf               g
+               ^
+syntax error, expecting <command>.
+root# run show cong       figuration security 
+ike {
+    proposal lag-abj-proposal {
+        authentication-method pre-shared-keys;
+        dh-group group2;
+        authentication-algorithm sha-256;
+        encryption-algorithm aes-256-cbc;
+        lifetime-seconds 86400;
+    }
+    policy lag-abj-policy {
+        mode main;
+        proposals lag-abj-proposal;
+        pre-shared-key ascii-text "$9$t9eC01hevLVwgSrwgoJHkp0B"; ## SECRET-DATA
+    }
+    gateway lag-abj-gateway {
+        ike-policy lag-abj-policy;
+        address 10.10.10.1;
+        external-interface ge-0/0/0.0;
+    }
+}
+ipsec {
+    proposal lag-abj-ipsec-proposal {
+        protocol esp;
+        authentication-algorithm hmac-sha1-96;
+---(more)---                                                encryption-algorithm aes-256-cbc;
+        lifetime-seconds 86400;
+        lifetime-kilobytes 4608000;
+    }
+    policy lag-abj-ipsec-policy {
+        proposals lag-abj-ipsec-proposal;
+    }
+    vpn lag-abj-vpn {
+        bind-interface st0.0;
+        ike {
+            gateway lag-abj-gateway;
+            ipsec-policy lag-abj-ipsec-policy;
+        }
+        traffic-selector lag-abj-traffic-selector {
+            local-ip 172.16.2.0/24;
+            remote-ip 172.16.1.0/24;
+        }
+        establish-tunnels immediately;
+    }
+}
+policies {
+    from-zone trust to-zone untrust {
+        policy trust-untrust-policy {
+---(more 34%)---                                                    match {
+                source-address trust-subnet;
+                destination-address untrust-subnet;
+                application junos-ping;
+            }
+            then {
+                permit;
+            }
+        }
+    }
+    from-zone untrust to-zone trust {
+        policy untrust-trust-policy {
+            match {
+                source-address untrust-subnet;
+                destination-address trust-subnet;
+                application junos-ping;
+            }
+            then {
+                permit;
+            }
+        }
+    }
+    from-zone vpn to-zone trust {
+---(more 51%)---                                                policy vpn-trust-policy {
+            match {
+                source-address vpn-subnet;
+                destination-address trust-subnet;
+                application junos-ping;
+            }
+            then {
+                permit;
+            }
+        }
+    }
+    from-zone trust to-zone vpn {
+        policy trust-vpn-policy {
+            match {
+                source-address trust-subnet;
+                destination-address vpn-subnet;
+                application junos-ping;
+            }
+            then {
+                permit;
+            }
+        }
+    }
+---(more 68%)---                                        }
+zones {
+    security-zone trust {
+        address-book {
+            address trust-subnet 172.16.2.0/24;
+        }
+        host-inbound-traffic {
+            system-services {
+                ping;
+            }
+        }
+        interfaces {
+            ge-0/0/1.0;
+        }
+    }
+    security-zone untrust {
+        address-book {
+            address untrust-subnet 10.10.10.0/30;
+        }
+        host-inbound-traffic {
+            system-services {
+                ping;
+                ike;
+---(more 85%)---                                                    }
+        }
+        interfaces {
+            ge-0/0/0.0;
+        }
+    }
+    security-zone vpn {
+        address-book {
+            address vpn-subnet 172.16.1.0/24;
+        }
+        host-inbound-traffic {
+            system-services {
+                ike;
+            }
+        }
+        interfaces {
+            st0.0;
+        }
+    }
+}
+
+[edit]
+root# root# run show configuration security    | display set | no-more 
+set security ike proposal lag-abj-proposal authentication-method pre-shared-keys
+set security ike proposal lag-abj-proposal dh-group group2
+set security ike proposal lag-abj-proposal authentication-algorithm sha-256
+set security ike proposal lag-abj-proposal encryption-algorithm aes-256-cbc
+set security ike proposal lag-abj-proposal lifetime-seconds 86400
+set security ike policy lag-abj-policy mode main
+set security ike policy lag-abj-policy proposals lag-abj-proposal
+set security ike policy lag-abj-policy pre-shared-key ascii-text "$9$t9eC01hevLVwgSrwgoJHkp0B"
+set security ike gateway lag-abj-gateway ike-policy lag-abj-policy
+set security ike gateway lag-abj-gateway address 10.10.10.1
+set security ike gateway lag-abj-gateway external-interface ge-0/0/0.0
+set security ipsec proposal lag-abj-ipsec-proposal protocol esp
+set security ipsec proposal lag-abj-ipsec-proposal authentication-algorithm hmac-sha1-96
+set security ipsec proposal lag-abj-ipsec-proposal encryption-algorithm aes-256-cbc
+set security ipsec proposal lag-abj-ipsec-proposal lifetime-seconds 86400
+set security ipsec proposal lag-abj-ipsec-proposal lifetime-kilobytes 4608000
+set security ipsec policy lag-abj-ipsec-policy proposals lag-abj-ipsec-proposal
+set security ipsec vpn lag-abj-vpn bind-interface st0.0
+set security ipsec vpn lag-abj-vpn ike gateway lag-abj-gateway
+set security ipsec vpn lag-abj-vpn ike ipsec-policy lag-abj-ipsec-policy
+set security ipsec vpn lag-abj-vpn traffic-selector lag-abj-traffic-selector local-ip 172.16.2.0/24
+set security ipsec vpn lag-abj-vpn traffic-selector lag-abj-traffic-selector remote-ip 172.16.1.0/24
+set security ipsec vpn lag-abj-vpn establish-tunnels immediately
+set security policies from-zone trust to-zone untrust policy trust-untrust-policy match source-address trust-subnet
+set security policies from-zone trust to-zone untrust policy trust-untrust-policy match destination-address untrust-subnet
+set security policies from-zone trust to-zone untrust policy trust-untrust-policy match application junos-ping
+set security policies from-zone trust to-zone untrust policy trust-untrust-policy then permit
+set security policies from-zone untrust to-zone trust policy untrust-trust-policy match source-address untrust-subnet
+set security policies from-zone untrust to-zone trust policy untrust-trust-policy match destination-address trust-subnet
+set security policies from-zone untrust to-zone trust policy untrust-trust-policy match application junos-ping
+set security policies from-zone untrust to-zone trust policy untrust-trust-policy then permit
+set security policies from-zone vpn to-zone trust policy vpn-trust-policy match source-address vpn-subnet
+set security policies from-zone vpn to-zone trust policy vpn-trust-policy match destination-address trust-subnet
+set security policies from-zone vpn to-zone trust policy vpn-trust-policy match application junos-ping
+set security policies from-zone vpn to-zone trust policy vpn-trust-policy then permit
+set security policies from-zone trust to-zone vpn policy trust-vpn-policy match source-address trust-subnet
+set security policies from-zone trust to-zone vpn policy trust-vpn-policy match destination-address vpn-subnet
+set security policies from-zone trust to-zone vpn policy trust-vpn-policy match application junos-ping
+set security policies from-zone trust to-zone vpn policy trust-vpn-policy then permit
+set security zones security-zone trust address-book address trust-subnet 172.16.2.0/24
+set security zones security-zone trust host-inbound-traffic system-services ping
+set security zones security-zone trust interfaces ge-0/0/1.0
+set security zones security-zone untrust address-book address untrust-subnet 10.10.10.0/30
+set security zones security-zone untrust host-inbound-traffic system-services ping
+set security zones security-zone untrust host-inbound-traffic system-services ike
+set security zones security-zone untrust interfaces ge-0/0/0.0
+set security zones security-zone vpn address-book address vpn-subnet 172.16.1.0/24
+set security zones security-zone vpn host-inbound-traffic system-services ike
+set security zones security-zone vpn interfaces st0.0
+
+[edit]
+root# 
